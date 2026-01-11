@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 clear
 
 RED='\033[0;31m'
@@ -7,17 +7,31 @@ YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-IP=$(curl -s ifconfig.me || echo "UNKNOWN")
-DOMAIN=$(cat /etc/kiki/domain 2>/dev/null || echo "not set")
-source /etc/kiki/license
+# Try multiple services to get public IP
+IP="$(curl -fsS --max-time 5 https://icanhazip.com 2>/dev/null || true)"
+if [ -z "$IP" ]; then
+  IP="$(curl -fsS --max-time 5 https://ifconfig.co 2>/dev/null || true)"
+fi
+IP="${IP%%$'\n'}"
+[ -z "$IP" ] && IP="UNKNOWN"
+
+DOMAIN="$(cat /etc/kiki/domain 2>/dev/null || echo "not set")"
+
+# Source license file safely
+LICENSE="UNREGISTERED"
+EXPIRED="none"
+if [ -f /etc/kiki/license ]; then
+  # shellcheck disable=SC1090
+  source /etc/kiki/license 2>/dev/null || true
+fi
 
 cat <<EOF
 ${CYAN}KIKI VPN MANAGER v1.2${NC}
 ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
 IP Server : $IP
 Domain    : $DOMAIN
-License   : $LICENSE
-Expiry    : $EXPIRED
+License   : ${LICENSE:-UNREGISTERED}
+Expiry    : ${EXPIRED:-none}
 ${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
 [1] Account Manager
 [2] Backup & Restore
@@ -44,5 +58,5 @@ case $opt in
 8) bash /usr/local/kiki/menu/update.sh ;;
 9) bash /usr/local/kiki/menu/uninstall.sh ;;
 0) exit ;;
-*) echo "Invalid"; sleep 1; kiki ;;
+*) echo "Invalid"; sleep 1; exec /usr/local/bin/kiki ;;
 esac

@@ -1,0 +1,10 @@
+[Unit]
+Description=KIKI VPN CORE
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/kiki-core
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,48 @@
+#!/bin/bash
+clear
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+IP=$(curl -s ifconfig.me || echo "UNKNOWN")
+DOMAIN=$(cat /etc/kiki/domain 2>/dev/null || echo "not set")
+source /etc/kiki/license
+
+cat <<EOF
+${CYAN}KIKI VPN MANAGER v1.2${NC}
+${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+IP Server : $IP
+Domain    : $DOMAIN
+License   : $LICENSE
+Expiry    : $EXPIRED
+${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+[1] Account Manager
+[2] Backup & Restore
+[3] Clear Expired
+[4] VPS Information
+[5] Domain Manager
+[6] Bot Manager
+[7] License Update
+[8] Update Script
+[9] Uninstall Script
+[0] Exit
+${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}
+EOF
+
+read -rp "Choose an option: " opt
+case $opt in
+1) bash /usr/local/kiki/menu/account.sh ;;
+2) bash /usr/local/kiki/menu/backup.sh ;;
+3) bash /usr/local/kiki/menu/clear-expired.sh ;;
+4) bash /usr/local/kiki/menu/vps-info.sh ;;
+5) bash /usr/local/kiki/menu/domain.sh ;;
+6) bash /usr/local/kiki/menu/bot.sh ;;
+7) bash /usr/local/kiki/menu/license-update.sh ;;
+8) bash /usr/local/kiki/menu/update.sh ;;
+9) bash /usr/local/kiki/menu/uninstall.sh ;;
+0) exit ;;
+*) echo "Invalid"; sleep 1; kiki ;;
+esac
